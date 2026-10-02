@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Writing check – ESOL</title>
+<style>
+:root{
+  --paper:#EEF2F5; --sheet:#FFFFFF; --ink:#13233A; --soft:#4A5B70;
+  --line:#8A4B08; --line-soft:#FBEFDD; --ok:#1E7B3C; --ok-soft:#E3F3E8;
+  --bad:#B42318; --bad-soft:#FBE7E5; --rule:#CBD5DF; --focus:#FFC83D;
+  --base:19px;
+  color-scheme: light;
+}
+body.big{ --base:23px; }
+*{ box-sizing:border-box; }
+html,body{ margin:0; }
+body{ font-family: Verdana, Tahoma, "Segoe UI", Arial, sans-serif; font-size:var(--base); line-height:1.55; color:var(--ink); background:var(--paper); }
+button,input,select,textarea{ font:inherit; color:inherit; }
+:focus-visible{ outline:4px solid var(--focus); outline-offset:2px; }
+
+header{ background:var(--sheet); border-bottom:1px solid var(--rule); }
+.head-in{ max-width:1160px; margin:0 auto; padding:14px 20px 10px; }
+.head-top{ display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; }
+.brand{ font-weight:700; font-size:1.05em; margin:0; }
+.tool{ background:none; border:2px solid var(--rule); border-radius:8px; padding:4px 10px; cursor:pointer; font-size:.8em; }
+.tool[aria-pressed="true"]{ border-color:var(--ink); background:var(--ink); color:#fff; }
+.route{ display:flex; margin:14px 0 4px; padding:0; list-style:none; }
+.route li{ flex:1; text-align:center; position:relative; font-size:.62em; color:var(--soft); padding-top:24px; }
+.route li::before{ content:""; position:absolute; top:8px; left:0; right:0; height:6px; background:var(--rule); }
+.route li:first-child::before{ left:50%; } .route li:last-child::before{ right:50%; }
+.route li.done::before, .route li.now::before{ background:var(--line); }
+.route li.now::before{ right:50%; }
+.route li span.stop{ position:absolute; top:2px; left:50%; transform:translateX(-50%); width:18px; height:18px; border-radius:50%; background:#fff; border:4px solid var(--rule); z-index:1; }
+.route li.done span.stop{ border-color:var(--line); background:var(--line); }
+.route li.now span.stop{ border-color:var(--line); width:24px; height:24px; top:-1px; }
+.route li.now{ color:var(--ink); font-weight:700; }
+.count{ font-size:.75em; color:var(--soft); margin:6px 0 0; }
+
+main{ max-width:1160px; margin:0 auto; padding:22px 20px 60px; }
+main.narrow{ max-width:820px; }
+.sheet{ background:var(--sheet); border:1px solid var(--rule); border-radius:6px; padding:26px 26px 22px; }
+h1{ font-size:1.5em; line-height:1.25; margin:0 0 10px; }
+h2{ font-size:1.2em; margin:0 0 8px; }
+h3{ font-size:1em; margin:20px 0 8px; }
+p{ margin:0 0 12px; }
+.ask{ font-size:1.1em; font-weight:700; margin:0 0 14px; }
+.quote{ border-left:6px solid var(--line); background:var(--line-soft); padding:8px 14px; border-radius:0 6px 6px 0; margin:0 0 14px; }
+.muted{ color:var(--soft); font-size:.85em; }
+
+/* Reading layout: text on the left, question on the right */
+.read{ display:grid; grid-template-columns:1fr; gap:22px; }
+@media (min-width:940px){ .read{ grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); align-items:start; } .read .text{ position:sticky; top:12px; } }
+.text{ border:2px solid #8A99AB; border-radius:8px; padding:18px 20px; background:#FFFDF6; }
+.text h2{ margin-bottom:10px; }
+.text p:last-child{ margin-bottom:0; }
+.text b.tw{ background:#FFE9A8; padding:0 3px; border-radius:3px; }
+.text.poster{ border:4px solid var(--line); text-align:center; }
+.text.poster .big{ font-size:1.25em; font-weight:700; color:var(--line); }
+.text.poster .box{ background:var(--line-soft); border-radius:6px; padding:10px; margin-bottom:12px; }
+.label{ font-size:.75em; font-weight:700; color:var(--soft); text-transform:uppercase; letter-spacing:.05em; margin:0 0 6px; }
+
+.field{ display:block; width:100%; border:2px solid #8A99AB; border-radius:6px; padding:12px; background:#fff; font-size:1em; }
+.field:focus{ border-color:var(--ink); }
+label.lab{ display:block; font-weight:700; margin:14px 0 6px; }
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; border:2px solid var(--ink); background:var(--ink); color:#fff; border-radius:6px; padding:12px 22px; font-weight:700; cursor:pointer; min-height:52px; text-decoration:none; }
+.btn.ghost{ background:#fff; color:var(--ink); }
+.btn.small{ min-height:40px; padding:6px 14px; font-size:.85em; }
+.btn.go{ background:var(--ok); border-color:var(--ok); }
+.nav{ display:flex; justify-content:space-between; align-items:center; gap:12px; margin-top:26px; padding-top:18px; border-top:1px solid var(--rule); flex-wrap:wrap; }
+.skip{ background:none; border:none; color:var(--soft); text-decoration:underline; cursor:pointer; padding:8px 0; font-size:.85em; }
+.dunno{ display:inline-flex; align-items:center; gap:10px; border:3px solid #C98A00; background:#FFF4D6; color:var(--ink); border-radius:6px; padding:10px 20px; font-weight:700; cursor:pointer; min-height:52px; }
+.dunno:hover{ background:#FFE9A8; }
+.dunno .em{ font-size:1.6em; line-height:1; }
+.err{ color:var(--bad); font-size:.8em; display:block; margin-top:4px; }
+
+.picks{ display:grid; grid-template-columns:1fr; gap:10px; }
+.picks.row{ grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); }
+.pick{ border:3px solid var(--rule); background:#fff; border-radius:8px; padding:12px 14px; cursor:pointer; text-align:left; min-height:56px; display:flex; align-items:center; gap:12px; }
+.picks.row .pick{ flex-direction:column; justify-content:center; text-align:center; }
+.pick:hover{ border-color:#8A99AB; }
+.pick[aria-pressed="true"]{ border-color:var(--line); background:var(--line-soft); font-weight:700; }
+.pick .em{ font-size:2.2em; line-height:1; }
+.pick .let{ flex:none; width:34px; height:34px; border-radius:50%; border:2px solid #8A99AB; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.85em; }
+.pick[aria-pressed="true"] .let{ background:var(--line); border-color:var(--line); color:#fff; }
+
+/* Put in order: click the words one by one */
+.slots{ display:grid; gap:8px; margin-bottom:16px; }
+.slot{ display:flex; align-items:center; gap:10px; min-height:54px; border:3px dashed #8A99AB; border-radius:8px; padding:6px 10px; background:var(--paper); }
+.slot .num{ flex:none; width:34px; height:34px; border-radius:50%; background:var(--ink); color:#fff; font-weight:700; display:flex; align-items:center; justify-content:center; }
+.slot.full{ border-style:solid; border-color:var(--line); background:var(--line-soft); }
+.pool{ display:flex; flex-wrap:wrap; gap:10px; min-height:56px; }
+.chip{ border:3px solid var(--ink); background:#fff; border-radius:8px; padding:8px 16px; cursor:pointer; font-weight:700; min-height:48px; text-align:left; }
+.chip.placed{ border:none; background:none; padding:0; flex:1; font-weight:700; min-height:0; }
+
+.msg{ margin-top:14px; padding:10px 14px; border-radius:6px; background:var(--paper); }
+.msg.ok{ background:var(--ok-soft); color:var(--ok); font-weight:700; }
+
+.laststep{ margin-top:22px; border:3px solid var(--ok); border-radius:8px; padding:18px 20px; background:var(--ok-soft); }
+.step{ display:flex; gap:14px; align-items:flex-start; margin:0 0 18px; }
+.step:last-child{ margin-bottom:0; }
+.stepnum{ flex:none; width:40px; height:40px; border-radius:50%; background:var(--ok); color:#fff; font-weight:700; display:flex; align-items:center; justify-content:center; }
+.step p{ margin:0 0 8px; }
+.subm{ display:inline-block; background:#0F6CBD; color:#fff; font-weight:600; padding:8px 22px; border-radius:4px; outline:4px solid var(--focus); outline-offset:3px; font-family:"Segoe UI",Arial,sans-serif; }
+
+.sec-res{ display:grid; grid-template-columns:1fr auto; gap:4px 16px; border-top:1px solid var(--rule); padding-top:12px; }
+.sec-res div{ padding:6px 0; border-bottom:1px solid var(--rule); }
+.bar{ height:10px; background:var(--rule); border-radius:5px; overflow:hidden; margin-top:4px; }
+.bar i{ display:block; height:100%; background:var(--line); }
+.band{ font-size:1.3em; font-weight:700; color:var(--line); }
+details{ margin-top:16px; }
+summary{ cursor:pointer; font-weight:700; }
+table.det{ border-collapse:collapse; width:100%; font-size:.8em; margin-top:8px; }
+table.det td, table.det th{ border-bottom:1px solid var(--rule); padding:6px; text-align:left; }
+.actions{ display:flex; flex-wrap:wrap; gap:10px; margin:16px 0; }
+.code{ width:100%; font-family:Consolas,"Courier New",monospace; font-size:.7em; border:2px dashed #8A99AB; border-radius:6px; padding:10px; background:var(--paper); }
+.overflow{ overflow-x:auto; }
+table.coll{ border-collapse:collapse; font-size:.72em; min-width:100%; }
+table.coll th, table.coll td{ border:1px solid var(--rule); padding:4px 8px; white-space:nowrap; }
+table.coll th{ background:var(--paper); }
+.shown{ font-size:1.2em; background:var(--line-soft); border-left:6px solid var(--line); padding:10px 14px; border-radius:0 6px 6px 0; margin:0 0 14px; }
+.shown.pic{ font-size:4em; line-height:1.1; background:none; border:none; padding:0; }
+ul{ margin:0 0 12px; padding-left:1.3em; }
+textarea.field{ line-height:1.5; resize:vertical; }
+.hidden{ display:none !important; }
+</style>
+</head>
+<body>
+<header>
+  <div class="head-in">
+    <div class="head-top">
+      <p class="brand" id="brand">Writing check</p>
+      <button class="tool" id="bigBtn" aria-pressed="false">Bigger text</button>
+    </div>
+    <ol class="route hidden" id="route" aria-label="Test parts"></ol>
+    <p class="count hidden" id="count"></p>
+  </div>
+</header>
+<main id="main" class="narrow"><div class="sheet" id="app" aria-live="polite"></div></main>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Settings from the link ----------
+   ?tl=Atin|atin@x;Barry|barry@x   teachers students can choose (email optional)
+   &f=FORMLINK        pre-filled Microsoft Form link (overrides DEFAULT_FORM below)
+   ?mode=teacher      opens the teacher setup page                                  */
+/* Paste your Microsoft Form pre-filled link between the quotes. Every student link then uses it.
+   Placeholder words: NAME NUMBER EMAIL TEACHER RESULT SCORE WRITING WORDS DATE MINUTES PART1 PART2 PART3 PART4 DETAILS CODE */
+const DEFAULT_FORM = "https://forms.cloud.microsoft/Pages/ResponsePage.aspx?id=mUft038080m159qCPJXo2Y1qZCuioLZMr502V7pP7tRURDlNNVhXOFlZSDAwRjdDSUNSMVBIMU1OVCQlQCNjPTEu&ra3cc52ae57554be3b58eab2784f9484b=NAME&rc7755d6aab77402787a3d9dcd7dfa914=EMAIL&ra3ff38e9da894395b81027ba36d48acd=NUMBER&r5b1587f25b734fcd81649ff67c41be32=TEACHER&rdcdeda851552441096fee48f83a9122b=WRITING&ra6fa3be9e26f4e45890b645010bafadb=SCORE&r81ddab9b551b447fb668a6c23d6a4af6=RESULT";
+const PASS = 4;          // marks out of 6 needed to move on to the next part
+const Q = new URLSearchParams(location.search);
+const CFG = {
+  teacher: (Q.get("t") || "").trim(),
+  teachers: (Q.get("tl") || "").split(";").map(x => { const [n, e] = x.split("|"); return {name:(n || "").trim(), email:(e || "").trim()}; }).filter(x => x.name),
+  form: (Q.get("f") || DEFAULT_FORM).trim(),
+  mode: Q.get("mode") || ""
+};
+const STORE = "writeCheck_v1";
+const VERSION = "WRv1";
+
+/* ---------- Helpers ---------- */
+function h(tag, attrs, ...kids){
+  const el = document.createElement(tag);
+  if (attrs) for (const k in attrs){
+    const v = attrs[k];
+    if (v === null || v === undefined || v === false) continue;
+    if (k === "class") el.className = v;
+    else if (k === "html") el.innerHTML = v;
+    else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+    else if (k === "style") el.style.cssText = v;
+    else el.setAttribute(k, v === true ? "" : v);
+  }
+  for (const kid of kids.flat()){
+    if (kid === null || kid === undefined || kid === false) continue;
+    el.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  }
+  return el;
+}
+const $ = id => document.getElementById(id);
+function load(){ try { return JSON.parse(localStorage.getItem(STORE)) || null; } catch(e){ return null; } }
+function save(){ try { localStorage.setItem(STORE, JSON.stringify(S)); } catch(e){} }
+function clearSave(){ try { localStorage.removeItem(STORE); } catch(e){} }
+function copyText(text, onDone){
+  const fallback = () => {
+    const ta = h("textarea", {style:"position:fixed;left:-9999px"}); ta.value = text;
+    document.body.append(ta); ta.select();
+    let ok = false; try { ok = document.execCommand("copy"); } catch(e){}
+    ta.remove(); onDone(ok);
+  };
+  if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(text).then(() => onDone(true), fallback);
+  else fallback();
+}
+function download(name, text, type){
+  const blob = new Blob([text], {type: type || "text/plain"});
+  const a = h("a", {href: URL.createObjectURL(blob), download: name});
+  document.body.append(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+function stamp(d){
+  const p = n => String(n).padStart(2, "0");
+  return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate())+" "+p(d.getHours())+":"+p(d.getMinutes());
+}
+function tidyName(v){
+  return (v || "").replace(/[|;]/g, " ").replace(/\s+/g, " ").trim().toLocaleLowerCase("en-GB")
+    .replace(/(^|[\s\-'’])(\p{L})/gu, (m, a, b) => a + b.toLocaleUpperCase("en-GB"));
+}
+
+/* ---------- The test: 4 parts, 6 typed questions each, then one piece of free writing ----------
+   strict:true  = capital letters and punctuation must be right (answers compared exactly)
+   otherwise    = capitals and . , ! ? are ignored
+   gap: a sentence with ___ ; shown: text the learner must rewrite; ans: every accepted answer   */
+const STAGES = [
+{ key:"A", level:"Entry 1", qs:[
+  {title:"Capital letters", ask:"Write the sentence again. Use capital letters and a full stop.", shown:"my name is sara", strict:true, ans:["My name is Sara."]},
+  {title:"Spelling", ask:"What is this? Write the word.", shown:"🚌", big:true, ans:["bus","a bus"]},
+  {title:"Word order", ask:"Put the words in order. Write the sentence.", shown:"live  /  I  /  London  /  in", ans:["I live in London"]},
+  {title:"Grammar", ask:"Write one word.", gap:"I ___ from Sudan.", ans:["am","come"]},
+  {title:"Grammar", ask:"Write one word.", gap:"She ___ two children.", ans:["has","has got"]},
+  {title:"Question mark", ask:"Write the question again. Use a capital letter and a question mark.", shown:"what is your name", strict:true, ans:["What is your name?"]}
+]},
+{ key:"B", level:"Entry 2", qs:[
+  {title:"Past tense", ask:"Write the correct word.", gap:"Yesterday I ___ (go) to the market.", ans:["went"]},
+  {title:"Joining sentences", ask:"Make one sentence. Use the word: because", shown:"I was late. The bus did not come.", ans:["I was late because the bus did not come","I was late because the bus didn't come","I was late because the bus didnt come","Because the bus did not come I was late","Because the bus didn't come I was late"]},
+  {title:"Spelling", ask:"One word has a spelling mistake. Write the word correctly.", shown:"My freind lives in Hackney.", ans:["friend","My friend lives in Hackney"]},
+  {title:"Plurals", ask:"Write the correct word.", gap:"I have two ___ (child).", ans:["children"]},
+  {title:"Comparing", ask:"Write the correct word.", gap:"London is ___ (big) than Leeds.", ans:["bigger"]},
+  {title:"Punctuation", ask:"Write the sentence again. Use capital letters and a full stop.", shown:"on monday i go to the doctor", strict:true, ans:["On Monday I go to the doctor.","On Monday, I go to the doctor."]}
+]},
+{ key:"C", level:"Entry 3", qs:[
+  {title:"Grammar", ask:"There is one mistake. Write the sentence correctly.", shown:"She don't like coffee.", ans:["She doesn't like coffee","She does not like coffee","She doesnt like coffee"]},
+  {title:"Grammar", ask:"Write one word.", gap:"I have lived in London ___ 2020.", ans:["since"]},
+  {title:"Past tense", ask:"Write the correct word.", gap:"I was cooking when the phone ___ (ring).", ans:["rang"]},
+  {title:"Spelling", ask:"Two words have spelling mistakes. Write the sentence correctly.", shown:"I will see you tommorow becuase I am busy today.", ans:["I will see you tomorrow because I am busy today"]},
+  {title:"Comparing", ask:"Write the correct words.", gap:"This is ___ (good) film I have ever seen.", ans:["the best"]},
+  {title:"Punctuation", ask:"Write the sentence again with the correct punctuation and capital letters.", shown:"my sisters name is fatima and she lives in leeds", strict:true, ans:["My sister's name is Fatima and she lives in Leeds.","My sister's name is Fatima, and she lives in Leeds."]}
+]},
+{ key:"D", level:"Level 1", qs:[
+  {title:"Passive", ask:"Write the correct words.", gap:"The letter ___ (send) yesterday.", ans:["was sent"]},
+  {title:"Conditionals", ask:"Write the correct word.", gap:"If I ___ (have) more time, I would study every day.", ans:["had"]},
+  {title:"Spelling", ask:"Two words have spelling mistakes. Write the sentence correctly.", shown:"Please send me more infomation about the accomodation.", ans:["Please send me more information about the accommodation"]},
+  {title:"Their / there / they're", ask:"Write the correct word: their, there or they're.", gap:"The students left ___ books in the classroom.", ans:["their"]},
+  {title:"Reported speech", ask:"Write one word.", shown:"She said, “I am tired.”", gap:"She said that she ___ tired.", ans:["was"]},
+  {title:"Punctuation", ask:"Write the sentence again with the correct punctuation and capital letters.", shown:"although it was late we didnt stop working", strict:true, ans:["Although it was late, we didn't stop working.","Although it was late we didn't stop working."]}
+]}
+];
+/* Free writing: the learner gets the task for the level the typed questions put them at. Marked by the teacher. */
+const WRITING = {
+  "Pre-Entry": {ask:"Write 3 sentences about you.", points:["your name","your country","your family"], words:""},
+  "Entry 1":   {ask:"Write 3 or 4 sentences about you.", points:["your name","your country","your family","what you like"], words:""},
+  "Entry 2":   {ask:"Write a message to your teacher. You cannot come to class tomorrow.", points:["Say why you cannot come.","Say when you can come back."], words:"Write 30 to 50 words."},
+  "Entry 3":   {ask:"Write an email to a friend about your English class.", points:["your class and your teacher","what you like about it","what is difficult for you"], words:"Write 80 to 100 words. Use paragraphs."},
+  "Level 1":   {ask:"Write an email to the manager of a leisure centre. You paid for a swimming course, but three lessons were cancelled.", points:["Explain what happened.","Say how this has affected you.","Say what you want the manager to do."], words:"Write 120 to 150 words. Use a formal style and paragraphs."}
+};
+WRITING["Level 2"] = WRITING["Level 1"];
+const TASKS = [];
+STAGES.forEach((st, si) => st.qs.forEach((q, qi) => TASKS.push(Object.assign({id: st.key + (qi + 1), st: si, n: qi}, q))));
+
+/* ---------- State ---------- */
+let S = null, cur = null;
+function freshState(name, id, email, teacher, temail){
+  return { v:VERSION, name, id, email, teacher, temail, started:Date.now(), idx:0, ans:{}, typed:{}, stopped:false, writing:"", wtask:"", wdone:false, finished:null };
+}
+const app = $("app");
+function wide(on){ $("main").classList.toggle("narrow", !on); }
+
+/* ---------- Header ---------- */
+function drawRoute(si, end){
+  const r = $("route"), c = $("count");
+  if (si === null){ r.classList.add("hidden"); c.classList.add("hidden"); return; }
+  r.classList.remove("hidden"); c.classList.remove("hidden");
+  r.innerHTML = "";
+  STAGES.forEach((s, i) => r.append(h("li", {class: end ? (i <= si ? "done" : "") : (i < si ? "done" : (i === si ? "now" : "")), "aria-current": !end && i === si ? "step" : null},
+    h("span", {class:"stop", "aria-hidden":"true"}), "Part " + (i + 1))));
+}
+
+/* ---------- Start screens ---------- */
+function startScreen(){
+  drawRoute(null); wide(false);
+  app.innerHTML = "";
+  const saved = load();
+  if (saved && saved.v === VERSION && !saved.finished){
+    app.append(h("h1", null, "Writing check"), h("div", {class:"msg"},
+      h("p", null, h("b", null, saved.name), " has a test that is not finished."),
+      h("div", {style:"display:flex;gap:10px;flex-wrap:wrap"},
+        h("button", {class:"btn", type:"button", onclick: () => { S = saved; taskScreen(); }}, "Continue the test"),
+        h("button", {class:"btn ghost", type:"button", onclick: () => { clearSave(); startScreen(); }}, "Start a new test"))));
+    return;
+  }
+  aboutScreen();
+}
+let chosenTeacher = null;
+function savedTeacher(){ return CFG.teachers.length === 1 ? CFG.teachers[0] : chosenTeacher; }
+function teacherFirst(){
+  app.innerHTML = ""; drawRoute(null); wide(false);
+  const OTHER = "Another teacher";
+  let tsel = null;
+  const tin = h("input", {class:"field" + (CFG.teachers.length ? " hidden" : ""), id:"tt", type:"text", autocomplete:"off", placeholder:"e.g. Atin", style: CFG.teachers.length ? "margin-top:8px" : null});
+  const er = h("span", {class:"err", role:"alert"});
+  if (CFG.teachers.length){
+    tsel = h("select", {class:"field", id:"tts"}, h("option", {value:""}, "Choose the name"),
+      CFG.teachers.map(x => h("option", {value:x.name}, x.name)), h("option", {value:OTHER}, OTHER));
+    tsel.addEventListener("change", () => { tin.classList.toggle("hidden", tsel.value !== OTHER); if (tsel.value === OTHER) tin.focus(); er.textContent = ""; });
+  }
+  const go = h("button", {class:"btn", type:"button", onclick: () => {
+    let t = null;
+    if (tsel && tsel.value && tsel.value !== OTHER) t = CFG.teachers.find(x => x.name === tsel.value);
+    else if (tidyName(tin.value).length > 1) t = {name: tidyName(tin.value), email: CFG.teacher};
+    if (!t){ er.textContent = tsel && !tsel.value ? "Choose the name." : "Type the name."; return; }
+    chosenTeacher = {name: tidyName(t.name), email: t.email || ""};
+    aboutScreen();
+  }}, "Next");
+  tin.addEventListener("keydown", e => { if (e.key === "Enter") go.click(); });
+  app.append(...[
+    h("h1", null, "What is your teacher's name?"),
+    h("p", {style:"font-size:1.15em"}, "👀 Look at the board. Write your teacher's name."),
+    h("label", {class:"lab", for: tsel ? "tts" : "tt"}, "Teacher's name"), tsel, tin, er,
+    h("div", {class:"nav"}, h("a", {href:"?mode=teacher", class:"muted"}, "Teachers: setup"), go)].filter(Boolean));
+  setTimeout(() => (tsel || tin).focus(), 50);
+}
+function aboutScreen(){
+  const T = savedTeacher();
+  if (!T){ teacherFirst(); return; }
+  app.innerHTML = ""; drawRoute(null); wide(false);
+  const clean = v => (v || "").trim().replace(/\|/g, "/");
+  const nm = h("input", {class:"field", id:"sn", type:"text", autocomplete:"off", placeholder:"e.g. Fatima Ali"});
+  const id = h("input", {class:"field", id:"si", type:"text", autocomplete:"off", inputmode:"numeric", placeholder:"e.g. 12345678"});
+  const noid = h("input", {type:"checkbox", id:"noid", style:"width:24px;height:24px", onchange: () => { id.disabled = noid.checked; if (noid.checked){ id.value = ""; e2.textContent = ""; } }});
+  const mail = h("input", {class:"field", id:"se", type:"email", inputmode:"email", autocomplete:"off", autocapitalize:"off", spellcheck:"false", placeholder:"e.g. fatima.ali@gmail.com"});
+  const e1 = h("span", {class:"err", role:"alert"}), e2 = h("span", {class:"err", role:"alert"}), e3 = h("span", {class:"err", role:"alert"});
+  const go = h("button", {class:"btn", type:"button", onclick: () => {
+    const ok1 = nm.value.trim().length > 1, ok2 = noid.checked || !!id.value.trim(), ok3 = /^\S+@\S+\.\S+$/.test(mail.value.trim());
+    e1.textContent = ok1 ? "" : "Write your name."; e2.textContent = ok2 ? "" : "Write your student number.";
+    if (!ok1){ nm.focus(); return; } if (!ok2){ id.focus(); return; }
+    e3.textContent = ok3 ? "" : "Write your email address."; if (!ok3){ mail.focus(); return; }
+    S = freshState(clean(nm.value), noid.checked ? "No ID" : clean(id.value), clean(mail.value).toLowerCase(), T.name, T.email || CFG.teacher);
+    save(); taskScreen();
+  }}, "Start the test");
+  [nm, id, mail].forEach(x => x.addEventListener("keydown", e => { if (e.key === "Enter") go.click(); }));
+  const change = CFG.teachers.length === 1 ? null :
+    h("button", {class:"skip", type:"button", onclick: () => { chosenTeacher = null; teacherFirst(); }}, "Change");
+  app.append(
+    h("h1", null, "Writing check"),
+    h("p", null, "This test checks your writing in English. You need a keyboard. Read the question. Then write your answer."),
+    h("p", null, "The test starts easy and gets harder. If you don't understand a question, click 😕 I don't understand."),
+    h("label", {class:"lab", for:"sn"}, "Your full name"), nm, e1,
+    h("label", {class:"lab", for:"si"}, "Student number"), id, e2,
+    h("div", {style:"display:flex;align-items:center;gap:10px;margin-top:8px"}, noid, h("label", {for:"noid"}, "I don't have a student number")),
+    h("label", {class:"lab", for:"se"}, "Your email address"), mail, e3,
+    h("div", {class:"nav"}, h("span", {class:"muted"}, "Teacher: " + T.name + " ", change), go));
+  setTimeout(() => nm.focus(), 50);
+}
+
+/* ---------- Questions ---------- */
+const tidy = v => (v || "").replace(/[’‘`]/g, "'").replace(/[“”]/g, '"').replace(/\s+/g, " ").trim();
+/* I'll = I will, don't = do not, etc. Possessives (sister's) are left alone. */
+const expand = v => v
+  .replace(/\bwon'?t\b/g, "will not").replace(/\bcan'?t\b/g, "can not").replace(/\bcannot\b/g, "can not").replace(/\bshan'?t\b/g, "shall not")
+  .replace(/\b(do|does|did|is|are|was|were|have|has|had|could|would|should|must|need)n'?t\b/g, "$1 not")
+  .replace(/\bi'm\b/g, "i am").replace(/\b(\w+)'re\b/g, "$1 are").replace(/\b(\w+)'ve\b/g, "$1 have").replace(/\b(\w+)'ll\b/g, "$1 will")
+  .replace(/\b(it|he|she|that|there|here|what|who|where)'s\b/g, "$1 is").replace(/\blet's\b/g, "let us");
+const loose = v => expand(tidy(v).toLowerCase()).replace(/[.,!?]/g, "").replace(/\s+/g, " ").trim();
+function isRight(q, t){
+  const v = t.v || "";
+  return q.strict ? q.ans.some(a => tidy(v) === a) : q.ans.some(a => loose(v) === loose(a));
+}
+const noHelp = {autocomplete:"off", autocapitalize:"none", autocorrect:"off", spellcheck:"false"};
+
+function taskScreen(){
+  if (S.stopped || S.idx >= TASKS.length){ if (S.wdone) finish(); else writeScreen(); return; }
+  const q = TASKS[S.idx], st = STAGES[q.st];
+  cur = {};
+  drawRoute(q.st); wide(false);
+  $("count").textContent = "Part " + (q.st + 1) + " – Question " + (q.n + 1) + " of " + st.qs.length;
+  app.innerHTML = "";
+  const next = h("button", {class:"btn", type:"button", onclick: () => record(q, isRight(q, cur) ? 1 : 0)}, "Next");
+  const inp = h("input", Object.assign({class:"field", type:"text", "aria-label":"Your answer", placeholder:"Write here",
+    oninput: () => cur.v = inp.value, onkeydown: e => { if (e.key === "Enter"){ e.preventDefault(); next.click(); } }}, noHelp));
+  app.append(...[h("p", {class:"label"}, "Question " + (q.n + 1) + ": " + q.title), h("p", {class:"ask"}, q.ask),
+    q.shown ? h("p", {class:"shown" + (q.big ? " pic" : "")}, q.shown) : null,
+    q.gap ? h("p", {class:"shown"}, q.gap) : null,
+    inp,
+    h("div", {class:"nav"},
+      h("button", {class:"dunno", type:"button", onclick: () => record(q, "s")}, h("span", {class:"em", "aria-hidden":"true"}, "😕"), "I don't understand"), next)].filter(Boolean));
+  setTimeout(() => inp.focus(), 50);
+  window.scrollTo(0, 0);
+}
+function stageScore(si){ return TASKS.filter(t => t.st === si && S.ans[t.id] === 1).length; }
+function record(q, val){
+  S.ans[q.id] = val;
+  if (val !== "s" && tidy(cur.v)) S.typed[q.id] = tidy(cur.v).replace(/\|/g, "/");
+  S.idx++;
+  const next = TASKS[S.idx];
+  if (!next || next.st !== q.st){ if (stageScore(q.st) < PASS) S.stopped = true; }
+  save(); taskScreen();
+}
+const countWords = v => (tidy(v).match(/\S+/g) || []).length;
+
+/* Free writing */
+function writeScreen(){
+  const lvl = placement().level, W = WRITING[lvl];
+  drawRoute(placement().lastPart, true); wide(false);
+  $("count").textContent = "Last part: writing";
+  app.innerHTML = "";
+  const wc = h("p", {class:"muted", style:"margin-top:6px"}, "Words: 0");
+  const ta = h("textarea", Object.assign({class:"field", rows:"10", maxlength:"1500", "aria-label":"Your writing", placeholder:"Write here",
+    oninput: () => { S.writing = ta.value; wc.textContent = "Words: " + countWords(ta.value); save(); }}, noHelp));
+  ta.value = S.writing || "";
+  wc.textContent = "Words: " + countWords(ta.value);
+  const end = () => { S.writing = ta.value; S.wtask = lvl; S.wdone = true; save(); finish(); };
+  app.append(...[h("h1", null, "Last part: writing"), h("p", {class:"ask"}, W.ask),
+    h("ul", null, W.points.map(p => h("li", null, p))),
+    W.words ? h("p", null, h("b", null, W.words)) : null,
+    ta, wc,
+    h("div", {class:"nav"}, h("button", {class:"dunno", type:"button", onclick: end}, h("span", {class:"em", "aria-hidden":"true"}, "😕"), "I can't do this"),
+      h("button", {class:"btn", type:"button", onclick: end}, "Finish"))].filter(Boolean));
+  setTimeout(() => ta.focus(), 50);
+  window.scrollTo(0, 0);
+}
+
+/* ---------- Scoring ----------
+   A learner moves on only with PASS/6 or more. They are placed at the level of the part where they stopped.
+   The free writing is not marked here: the teacher reads it and confirms the level. */
+function placement(){
+  const secs = STAGES.map((s, i) => ({i, level:s.level, of:s.qs.length, done: TASKS.some(t => t.st === i && S.ans[t.id] !== undefined), got: stageScore(i)})).filter(s => s.done);
+  const lastS = secs[secs.length - 1];
+  let level;
+  if (lastS.got >= PASS) level = "Level 2";
+  else if (lastS.i === 0 && lastS.got <= 1) level = "Pre-Entry";
+  else level = lastS.level;
+  return {secs, level, lastPart: lastS.i};
+}
+function summary(){
+  const P = placement();
+  const got = P.secs.reduce((a, s) => a + s.got, 0), of = P.secs.reduce((a, s) => a + s.of, 0);
+  const mins = Math.max(1, Math.round(((S.finished || Date.now()) - S.started) / 60000));
+  const writing = (S.writing || "").trim();
+  return {secs:P.secs, got, of, level:P.level, mins, lastPart:P.lastPart, writing, words: countWords(writing)};
+}
+function mark(a){ return a === 1 ? "✓" : a === "s" ? "😕" : "✗"; }
+function resultCode(R){
+  const tasks = TASKS.filter(t => S.ans[t.id] !== undefined).map(t => t.id + ":" + S.ans[t.id]).join(",");
+  return [VERSION, S.name, S.id, S.email || "", S.teacher || "", stamp(new Date(S.finished)), R.mins + "m", R.got + "/" + R.of,
+    R.secs.map(s => STAGES[s.i].key + "=" + s.got + "/" + s.of).join(";"), tasks, R.level, R.words + "w"].join("|");
+}
+function resultText(R){
+  const lines = ["Writing check – results", "", "Name: " + S.name, "Student number: " + S.id, "Email: " + (S.email || "-"), "Teacher: " + (S.teacher || "-"),
+    "Date: " + stamp(new Date(S.finished)), "Time taken: " + R.mins + " minutes", "", "Level from the typed questions: " + R.level, ""];
+  R.secs.forEach(s => lines.push("Part " + (s.i + 1) + " (" + s.level + "): " + s.got + " / " + s.of));
+  lines.push("", "Writing task (" + (S.wtask || R.level) + "), " + R.words + " words:", R.writing || "(nothing written)");
+  lines.push("", "Results code (for the teacher's sheet):", resultCode(R));
+  return lines.join("\n");
+}
+
+function finish(){
+  if (!S.finished){ S.finished = Date.now(); save(); }
+  const R = summary(), code = resultCode(R);
+  drawRoute(R.lastPart, true); wide(false);
+  $("count").textContent = "Finished";
+  app.innerHTML = "";
+  app.append(h("h1", null, "Well done, " + S.name.split(" ")[0] + ". You finished!"),
+    h("p", null, "Your level from the questions:"), h("p", {class:"band"}, R.level),
+    h("p", {class:"muted"}, "Your teacher will read your writing and decide your class."));
+  const grid = h("div", {class:"sec-res"});
+  R.secs.forEach(s => grid.append(
+    h("div", null, "Part " + (s.i + 1) + " (" + s.level + ")", h("div", {class:"bar", "aria-hidden":"true"}, h("i", {style:"width:" + Math.round(100 * s.got / s.of) + "%"}))),
+    h("div", {style:"text-align:right;font-weight:700"}, s.got + " / " + s.of)));
+  app.append(grid);
+
+  const temail = S.temail || CFG.teacher;
+  const status = h("div", {class:"msg hidden", role:"status"});
+  const done = text => { status.className = "msg ok"; status.textContent = text; };
+  if (CFG.form){
+    const step = (n, kids) => h("div", {class:"step"}, h("span", {class:"stepnum", "aria-hidden":"true"}, n), h("div", null, kids));
+    app.append(h("div", {class:"laststep"},
+      h("h2", null, S.formSent ? "Did you click Submit? Do it again:" : "Last step: send your results to your teacher"),
+      step("1", [h("p", null, h("b", null, "Click this green button:")),
+        h("button", {class:"btn go", type:"button", style:"font-size:1.15em;padding:16px 30px", onclick: () => {
+          S.formSent = true; save(); location.href = fillForm(CFG.form, R, code);
+        }}, "📨 Submit to my teacher – click here")]),
+      step("2", [h("p", null, h("b", null, "A new page opens. Scroll down ⬇ to the bottom. Find this button and click it:")),
+        h("p", null, h("span", {class:"subm"}, "Submit"), "  👈")]),
+      step("3", [h("p", null, h("b", null, "Wait for the message: "), "“Your response was submitted”. Then you are finished. ✓")])),
+      h("h2", {style:"margin-top:24px"}, "Other ways to send"));
+  } else app.append(h("h2", {style:"margin-top:24px"}, "Send your results to your teacher"));
+  const acts = h("div", {class:"actions"});
+  if (temail) acts.append(h("button", {class:"btn ghost", type:"button", onclick: () => {
+    location.href = "mailto:" + temail + "?subject=" + encodeURIComponent("Writing check – " + S.name + " " + S.id) + "&body=" + encodeURIComponent(resultText(R));
+    done("Your email app should open. Click Send.");
+  }}, "Email my teacher"));
+  acts.append(
+    h("button", {class:"btn ghost", type:"button", onclick: () => copyText(resultText(R), ok => done(ok ? "Copied. Now paste it (Ctrl+V) into Teams or an email to your teacher." : "Copy did not work. Select the code below and copy it."))}, "Copy results"),
+    h("button", {class:"btn ghost", type:"button", onclick: () => { download("Writing-results-" + (S.name || "student").replace(/[^\w-]+/g, "_") + ".txt", resultText(R)); done("Saved. Upload this file to your teacher in Teams."); }}, "Download results"));
+  app.append(acts, status);
+  const ta = h("textarea", {class:"code", rows:"3", readonly:true, "aria-label":"Results code"});
+  ta.value = code; ta.addEventListener("focus", () => ta.select());
+  app.append(h("p", {class:"muted", style:"margin-top:16px"}, "Results code"), ta);
+  app.append(h("details", null, h("summary", null, "Details for the teacher"),
+    h("p", {class:"muted"}, "Time taken: " + R.mins + " minutes. Learners move to the next part with " + PASS + "/6 or more."),
+    h("h3", null, "Writing task (" + (S.wtask || R.level) + "), " + R.words + " words"),
+    h("p", {class:"shown", style:"white-space:pre-wrap;font-size:1em"}, R.writing || "(nothing written)"),
+    h("table", {class:"det"}, h("thead", null, h("tr", null, h("th", null, "Question"), h("th", null, "Skill"), h("th", null, "Result"), h("th", null, "Student wrote"))),
+      h("tbody", null, TASKS.filter(t => S.ans[t.id] !== undefined).map(t =>
+        h("tr", null, h("td", null, t.id + " (" + STAGES[t.st].level + ")"), h("td", null, t.title),
+          h("td", null, mark(S.ans[t.id]) + (S.ans[t.id] === "s" ? " Didn't understand" : "")), h("td", null, S.typed[t.id] || "")))))));
+  app.append(h("div", {class:"nav"}, h("span", {class:"muted"}, "Next student on this computer?"),
+    h("button", {class:"btn ghost", type:"button", onclick: () => {
+      if (confirm("Start a new test? These results will be removed from this screen.")){ clearSave(); S = null; startScreen(); }
+    }}, "New test")));
+  window.scrollTo(0, 0);
+}
+
+/* ---------- Microsoft Form: fill placeholder answers ---------- */
+function fillForm(url, R, code){
+  const part = i => { const x = R.secs.find(s => s.i === i); return x ? x.got + "/" + x.of : "-"; };
+  const vals = { NAME:S.name, NUMBER:S.id, EMAIL:S.email || "", TEACHER:S.teacher || "", LEVEL:R.level, RESULT:R.level, SCORE:R.got + "/" + R.of,
+    DATE:stamp(new Date(S.finished)), MINUTES:String(R.mins), PART1:part(0), PART2:part(1), PART3:part(2), PART4:part(3),
+    DETAILS:TASKS.filter(t => S.ans[t.id] !== undefined).map(t => t.id + " " + mark(S.ans[t.id])).join(", "), CODE:code, RESULTS:code, WRITING:R.writing || "(nothing written)", WORDS:String(R.words) };
+  const qi = url.indexOf("?");
+  if (qi < 0) return url;
+  return url.slice(0, qi) + "?" + url.slice(qi + 1).split("#")[0].split("&").map(pair => {
+    const i = pair.indexOf("=");
+    if (i < 0) return pair;
+    let v; try { v = decodeURIComponent(pair.slice(i + 1).replace(/\+/g, " ")); } catch(e){ return pair; }
+    const quoted = /^".*"$/.test(v.trim());
+    const key = v.trim().replace(/^"|"$/g, "").toUpperCase();
+    if (!Object.prototype.hasOwnProperty.call(vals, key)) return pair;
+    return pair.slice(0, i) + "=" + encodeURIComponent(quoted ? JSON.stringify(vals[key]) : vals[key]);
+  }).join("&");
+}
+
+/* ---------- Teacher page ---------- */
+function teacherScreen(){
+  document.title = "Teacher setup – Writing check";
+  $("brand").textContent = "Writing check: teacher setup";
+  app.innerHTML = "";
+  app.append(h("h1", null, "Set up the writing check"),
+    h("p", null, "Fill this in, then share the link with students on Teams or the board."));
+  const em = h("textarea", {class:"field", id:"te", rows:"4", placeholder:"Atin, atin.wickham@ncclondon.ac.uk\nBarry\nJoey"});
+  em.value = CFG.teachers.map(x => x.name + (x.email ? ", " + x.email : "")).join("\n");
+  const fm = h("input", {class:"field", id:"tf", type:"url", placeholder:"https://forms.office.com/Pages/ResponsePage.aspx?id=…", value: Q.get("f") || ""});
+  const out = h("textarea", {class:"code", rows:"3", readonly:true, "aria-label":"Your class link"});
+  const st = h("p", {class:"muted"});
+  const build = () => {
+    const p = new URLSearchParams();
+    const tl = em.value.split(/\n+/).map(l => { const i = l.indexOf(","); const n = (i < 0 ? l : l.slice(0, i)).trim().replace(/[|;]/g, ""); const e = i < 0 ? "" : l.slice(i + 1).trim().replace(/[|;]/g, ""); return n ? n + (e ? "|" + e : "") : ""; }).filter(Boolean).join(";");
+    if (tl) p.set("tl", tl);
+    if (fm.value.trim()) p.set("f", fm.value.trim());
+    out.value = location.href.split("?")[0].split("#")[0] + (p.toString() ? "?" + p.toString() : "");
+  };
+  [em, fm].forEach(x => x.addEventListener("input", build)); build();
+  app.append(
+    h("label", {class:"lab", for:"te"}, "Teachers"), em,
+    h("p", {class:"muted"}, "One name gives a link for your own class. Several names (one per line) gives a drop-down. An email after a comma is optional."),
+    h("label", {class:"lab", for:"tf"}, "Microsoft Form link (puts results into Excel)"), fm,
+    h("p", {class:"muted"}, (DEFAULT_FORM ? "A form is already built in. Only fill this in to use a different one. " : "") + "Make a form with Text questions, choose 'Get pre-filled URL' and type these placeholder words in the boxes: NAME, NUMBER, EMAIL, TEACHER, RESULT, SCORE, DATE, MINUTES, PART1, PART2, PART3, PART4, DETAILS, WRITING, WORDS. Turn on 'Long answer' for the WRITING question."),
+    h("h3", null, "Your class link"), out, st,
+    h("div", {class:"actions"},
+      h("button", {class:"btn", type:"button", onclick: () => copyText(out.value, ok => st.textContent = ok ? "Link copied." : "Select the link and copy it.")}, "Copy link"),
+      h("a", {class:"btn ghost", href:"#", onclick: e => { e.preventDefault(); window.open(out.value, "_blank", "noopener"); }}, "Try the test")),
+    h("h3", null, "How levels are decided"),
+    h("p", {class:"muted"}, "Four parts of typed questions (Entry 1, Entry 2, Entry 3, Level 1), 6 each, marked automatically. A learner needs " + PASS + "/6 to move on; if not, that part's level is their level. 0–1 in Part 1 gives Pre-Entry. " + PASS + "/6 or more in Part 4 gives Level 2. They then do one piece of free writing set at that level, which you mark yourself: read it in the form results or the results text, and move the learner up or down if it does not match."),
+    h("h2", {style:"margin-top:32px"}, "Results sheet"),
+    h("p", null, "For results sent by email, Teams or file. Paste them here and the results codes are put into a table."));
+  const paste = h("textarea", {class:"field", rows:"6", "aria-label":"Paste results here", placeholder:"WRv1|Fatima Ali|12345678|…"});
+  const tableBox = h("div", {class:"overflow"});
+  paste.addEventListener("input", () => {
+    const seen = new Set(), rows = [];
+    (paste.value.match(/WRv1\|[^\r\n"]+/g) || []).forEach(line => {
+      const p = line.split("|");
+      if (p.length < 11 || seen.has(p[1] + p[2] + p[5])) return;
+      seen.add(p[1] + p[2] + p[5]);
+      const secs = {}; p[8].split(";").forEach(x => { const [k, v] = x.split("="); secs[k] = v; });
+      rows.push({name:p[1], id:p[2], email:p[3], teacher:p[4], date:p[5], mins:p[6].replace("m", ""), score:p[7], secs, level:p[10].trim()});
+    });
+    rows.sort((a, b) => a.name.localeCompare(b.name));
+    tableBox.innerHTML = "";
+    if (!rows.length){ tableBox.append(h("p", {class:"muted"}, paste.value.trim() ? "No results codes found in the text." : "")); return; }
+    const head = ["Name","Student number","Email","Teacher","Date","Minutes","Level","Score"].concat(STAGES.map((s, i) => "Part " + (i + 1) + " (" + s.level + ")"));
+    const body = rows.map(r => [r.name, r.id, r.email, r.teacher, r.date, r.mins, r.level, r.score].concat(STAGES.map(s => r.secs[s.key] || "")));
+    tableBox.append(h("p", null, h("b", null, rows.length + " student" + (rows.length > 1 ? "s" : ""))),
+      h("table", {class:"coll"}, h("thead", null, h("tr", null, head.map(x => h("th", null, x)))),
+        h("tbody", null, body.map(r => h("tr", null, r.map(x => h("td", null, x)))))),
+      h("div", {class:"actions"}, h("button", {class:"btn", type:"button", onclick: () => {
+        const esc = v => /[",\n]/.test(String(v)) ? '"' + String(v).replace(/"/g, '""') + '"' : String(v);
+        // a leading tab stops Excel reading 5/7 as a date
+        const safe = v => /^\d+\/\d+$/.test(String(v)) ? "\t" + v : v;
+        download("Writing-check-results.csv", "\uFEFF" + [head].concat(body).map(row => row.map(x => esc(safe(x))).join(",")).join("\r\n"), "text/csv");
+      }}, "Download for Excel (CSV)")));
+  });
+  app.append(paste, tableBox);
+}
+
+/* ---------- Start ---------- */
+$("bigBtn").addEventListener("click", e => {
+  const on = document.body.classList.toggle("big");
+  e.currentTarget.setAttribute("aria-pressed", on ? "true" : "false");
+  try { localStorage.setItem(STORE + "_big", on ? "1" : ""); } catch(err){}
+});
+try { if (localStorage.getItem(STORE + "_big")){ document.body.classList.add("big"); $("bigBtn").setAttribute("aria-pressed", "true"); } } catch(e){}
+window.addEventListener("beforeunload", e => { if (S && !S.finished && S.idx > 0){ e.preventDefault(); e.returnValue = ""; } });
+
+if (CFG.mode === "teacher") teacherScreen();
+else {
+  const saved = load();
+  if (saved && saved.v === VERSION && saved.finished){ S = saved; finish(); }
+  else startScreen();
+}
+})();
+</script>
+</body>
+</html>
